@@ -1,4 +1,4 @@
-use std::{path::{Path, PathBuf}, error::Error, env, process::exit, string, fs, io};
+use std::{path::PathBuf, error::Error, env, process::exit, fs, io};
 use serde::Deserialize;
 
 mod cli;
@@ -10,18 +10,20 @@ pub struct Cheatsheet {
     pub tags: Vec<String>
 }
 
+// XXX : Return Result to manage error
+pub fn get_json_data(path: &PathBuf) -> Vec<Cheatsheet> {
+    let json_file = fs::File::open(path).expect("file should open read only");
+    let ch: Vec<Cheatsheet> = serde_json::from_reader(json_file).expect("file should be proper JSON");
+    ch
+}
+
 pub fn find_topic(
     path: &PathBuf, 
     topic: &str, 
     search: &Option<&String>, 
     filter: &Option<&String>) 
 -> io::Result<()> {
-    let mut p = path.clone();
-    p.push(topic); 
-    p.set_extension("json");
-    
-    let json_file = fs::File::open(p).expect("file should open read only");
-    let ch: Vec<Cheatsheet> = serde_json::from_reader(json_file).expect("file should be proper JSON");
+    let ch = get_json_data(&path);
 
     let matches : Vec<&Cheatsheet> = if let Some(f) = filter {
          if let Some(s) = search {
@@ -38,7 +40,7 @@ pub fn find_topic(
     };
 
     for m in matches.iter() {
-        println!("{}", m.description);
+        println!("[{}] {}", topic, m.description);
         for d in m.data.iter() {
             println!("- {}", d);
         } 
@@ -54,29 +56,14 @@ pub fn find_files(path: &PathBuf, search: &Option<&String>, filter: &Option<&Str
         let p = entry.path();
         if let Some(extension) = p.extension() {
             if extension == "json" {
-                let json_file = fs::File::open(p).expect("file should open read only");
-                let ch: Vec<Cheatsheet> = serde_json::from_reader(json_file).expect("file should be proper JSON");
+                let mut pp = p.clone();
+                pp.set_extension("");
 
-                let matches : Vec<&Cheatsheet> = if let Some(f) = filter {
-                    if let Some(s) = search {
-                        ch.iter().filter(|e| { e.description.contains(*s) && e.tags.contains(f) }).map(|c| c).collect()
-                    } else {
-                        ch.iter().filter(|e| { e.tags.contains(f) }).map(|c| c).collect()
+                if let Some(topic_ostr) = pp.file_name() {
+                    if let Some(topic) = topic_ostr.to_str() {
+                        let _ = find_topic(&p, &topic, &search, &filter);
                     }
-                } else {
-                    if let Some(s) = search {
-                        ch.iter().filter(|e| { e.description.contains(*s) }).map(|c| c).collect()
-                    } else {
-                        ch.iter().collect()
-                    }
-                };
-
-                for m in matches.iter() {
-                    println!("{}", m.description);
-                    for d in m.data.iter() {
-                        println!("- {}", d);
-                    } 
-                println!("");
+                    // XXX: Add log here
                 }
             }
         }
@@ -120,6 +107,8 @@ fn main() {
                 if show_path {
                     let _ = show_paths(&pathbuf, &topic);
                 } else {
+                    pathbuf.push(topic); 
+                    pathbuf.set_extension("json");
                     let _ = find_topic(&pathbuf, &topic, &search, &filter);
                 }         
             } else {
