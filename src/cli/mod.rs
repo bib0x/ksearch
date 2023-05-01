@@ -36,3 +36,8 @@ pub fn build_cli(program_name: &'static str) -> Command {
             .help("Show topic path if exist")
         )
 }
+
+#[test]
+fn verify_app() {
+   build_cli("ksearch_test").debug_assert();
+}
