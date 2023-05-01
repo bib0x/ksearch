@@ -1,44 +1,7 @@
 use std::{path::{Path, PathBuf}, error::Error, env, process::exit, string, fs, io};
-use clap::{Command, Arg, ArgAction};
 use serde::Deserialize;
 
-pub fn build_cli(program_name: &'static str) -> Command {
-    Command::new(program_name)
-        .about("CLI to search knowlege from JSON cheatsheets")
-        .arg(
-            Arg::new("search")
-            .long("search")
-            .short('s')
-            .help("Term to search")
-        )
-        .arg(
-            Arg::new("topic")
-            .long("topic")
-            .short('t')
-            .help("Targeted search topic")
-        )
-        .arg(
-            Arg::new("filter")
-            .long("filter")
-            .short('f')
-            .help("Search filters such as tags")
-        )
-        .arg(
-            Arg::new("env")
-            .long("environment")
-            .short('e')
-            .action(ArgAction::SetTrue)
-            .help("Show environment variable")
-        )
-        .arg(
-            Arg::new("path")
-            .long("path")
-            .short('p')
-            .action(ArgAction::SetTrue)
-            .help("Show topic path if exist")
-        )
-}
-
+mod cli;
 
 #[derive(Deserialize, Debug)]
 pub struct Cheatsheet {
@@ -140,7 +103,7 @@ fn main() {
         }
     };
 
-    let matches = build_cli("ksearch").get_matches();
+    let matches = cli::build_cli("ksearch").get_matches();
     let search = matches.get_one::<String>("search");
     let topic = matches.get_one::<String>("topic");
     let filter = matches.get_one::<String>("filter");
@@ -168,5 +131,5 @@ fn main() {
 
 #[test]
 fn verify_app() {
-    build_cli("ksearch_test").debug_assert();
+    cli::build_cli("ksearch_test").debug_assert();
 }
