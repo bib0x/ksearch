@@ -17,5 +17,5 @@ $ ksearch -e
 
 - [ ] Tests
 - [ ] add comment to cheatsheet ?
-- [ ] manage CUE/JSON export via CLI
+- [x] manage CUE/JSON export via CLI
 - [ ] manage alias link
