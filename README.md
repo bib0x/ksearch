@@ -12,3 +12,10 @@ $ ksearch -s <term> -t <topic> -f <tags> -m
 $ ksearch -t <topic> -p
 $ ksearch -e
 ```
+
+## Todo
+
+- [ ] Tests
+- [ ] add comment to cheatsheet ?
+- [ ] manage CUE/JSON export via CLI
+- [ ] manage alias link

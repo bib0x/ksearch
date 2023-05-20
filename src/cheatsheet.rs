@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use std::{path::PathBuf, error::Error, env, process::exit, fs, io};
+use std::{path::PathBuf, fs, io};
 
 #[derive(Deserialize, Debug)]
 pub struct Cheatsheet {

@@ -35,6 +35,13 @@ pub fn build_cli(program_name: &'static str) -> Command {
             .action(ArgAction::SetTrue)
             .help("Show topic path if exist")
         )
+        .arg(
+            Arg::new("generate")
+            .long("generate")
+            .short('G')
+            .action(ArgAction::SetTrue)
+            .help("Generate CUE notes as JSON file")
+        )
 }
 
 #[test]
