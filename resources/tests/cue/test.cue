@@ -1,13 +1,11 @@
-import "list"
+package main
 
-#Cheat: {
-    description: string
-    data: [...string]
-    tags: [...string]
-}
+import (
+  "bib0x.github.com/schema"
+)
 
 [
-  #Cheat & { 
+  schema.#Cheat & { 
     description: "show routes", 
     data: [ 
       "netstat -rWn", 
@@ -16,7 +14,7 @@ import "list"
       "netstat", 
     ] 
   },
-  #Cheat & { 
+  schema.#Cheat & { 
     description: "show rules", 
     data: [ 
       "pfctl -sr", 

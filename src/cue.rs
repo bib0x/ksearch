@@ -1,4 +1,4 @@
-use std::{path::PathBuf, fs, io, process::Command};
+use std::{env, path::PathBuf, fs, io, process::Command};
 
 pub fn export_as_json(cuepath: &PathBuf, jsonpath: &PathBuf) -> io::Result<()> {
     for entry in fs::read_dir(cuepath)? {
@@ -13,6 +13,7 @@ pub fn export_as_json(cuepath: &PathBuf, jsonpath: &PathBuf) -> io::Result<()> {
                        let mut json_outfile = jsonpath.clone();
                        json_outfile.push(filename);
                        json_outfile.set_extension("json");
+                       let _ = env::set_current_dir(&cuepath).is_ok();
                        Command::new("cue")
                             .arg("export")
                             .arg(p.display().to_string())

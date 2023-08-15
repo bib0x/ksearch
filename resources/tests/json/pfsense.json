@@ -1,0 +1,21 @@
+[
+    {
+        "description": "show routes",
+        "data": [
+            "netstat -rWn"
+        ],
+        "tags": [
+            "netstat"
+        ]
+    },
+    {
+        "description": "show rules",
+        "data": [
+            "pfctl -sr"
+        ],
+        "tags": [
+            "pfctl",
+            "firewall"
+        ]
+    }
+]

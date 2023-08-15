@@ -48,6 +48,7 @@ fn main() {
                     exit(1);
                 }
             } else {
+                pathbuf.push("json");
                 if let Some(topic) = topic {
                     if show_path {
                         let _ = show_paths(&pathbuf, &topic);
