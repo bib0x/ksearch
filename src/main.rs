@@ -1,12 +1,12 @@
-use std::{path::PathBuf,env, process::exit,io};
+use std::{env, io, path::PathBuf, process::exit};
 
+mod cheatsheet;
 mod cli;
 mod cue;
-mod cheatsheet;
 
 pub fn show_paths(path: &PathBuf, topic: &str) -> io::Result<()> {
     let mut p = path.clone();
-    p.push(topic); 
+    p.push(topic);
     p.set_extension("json");
     if p.exists() {
         println!("{}", p.display());
@@ -30,6 +30,7 @@ fn main() {
     let env = matches.get_flag("env");
     let show_path = matches.get_flag("path");
     let generate_flag = matches.get_flag("generate");
+    let inventory = matches.get_flag("inventory");
 
     if env {
         println!("KSEARCH={}", csheet_paths.as_str());
@@ -37,7 +38,7 @@ fn main() {
         for path in csheet_paths.split(":") {
             let mut pathbuf = PathBuf::new();
             pathbuf.push(path);
-            
+
             if generate_flag {
                 let mut cuepath = pathbuf.clone();
                 let mut jsonpath = pathbuf.clone();
@@ -53,15 +54,20 @@ fn main() {
                     if show_path {
                         let _ = show_paths(&pathbuf, &topic);
                     } else {
-                        pathbuf.push(topic); 
+                        pathbuf.push(topic);
                         pathbuf.set_extension("json");
                         let _ = cheatsheet::find_topic(&pathbuf, &topic, &search, &filter);
-                    }         
+                    }
                 } else {
-                    let _ = cheatsheet::find_files(&pathbuf, &search, &filter);
+                    if inventory {
+                        println!("{}", pathbuf.display());
+                        let _ = cheatsheet::find_files(&pathbuf, &None, &None, inventory);
+                        println!("")
+                    } else {
+                        let _ = cheatsheet::find_files(&pathbuf, &search, &filter, inventory);
+                    }
                 }
             }
-
         }
     }
 }
