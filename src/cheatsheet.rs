@@ -1,11 +1,39 @@
 use serde::Deserialize;
 use std::{fs, io, path::PathBuf};
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct Cheatsheet {
     pub description: String,
     pub data: Vec<String>,
     pub tags: Vec<String>,
+}
+
+impl Cheatsheet {
+    pub fn display(&self, topic: &str) {
+        println!("");
+        if self.tags.len() > 0 {
+            println!("[{}][{}] {}", topic, self.tags.join(" "), self.description);
+        } else {
+            println!("[{}] {}", topic, self.description);
+        }
+        for d in self.data.iter() {
+            println!("- {}", d);
+        }
+        println!("");
+    }
+
+    pub fn display_colorized(&self, topic: &str) {
+        println!("");
+        println!(
+            "\x1b[93;1m[{}]\x1b[0m\x1b[94;1m[{}]\x1b[0m",
+            topic,
+            self.tags.join(" ")
+        );
+        println!("\x1b[92;1m#\x1b[0m {}", self.description);
+        for d in self.data.iter() {
+            println!("\x1b[92;1m>>>\x1b[0m \x1b[95m{}\x1b[0m", d);
+        }
+    }
 }
 
 pub fn from_file(path: &PathBuf) -> Vec<Cheatsheet> {
@@ -47,12 +75,11 @@ pub fn find_topic(
     };
 
     for m in matches.iter() {
-        println!("[{}] {}", topic, m.description);
-        for d in m.data.iter() {
-            println!("- {}", d);
-        }
-        println!("");
+        // XXX: check for COLORED env variable
+        // else call m.display(&topic)
+        m.display_colorized(&topic);
     }
+    println!("");
 
     Ok(())
 }
