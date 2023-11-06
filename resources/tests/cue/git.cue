@@ -23,4 +23,13 @@ import (
 			"git-submodule",
 		]
 	},
+	schema.#Cheat & {
+		description: "search for terms/string in commit message history"
+		data: [
+			"git log --all --grep='<message>'",
+			"git log --grep='<message>'",
+			"git log --author='<username>'",
+		]
+		tags: []
+	},
 ]

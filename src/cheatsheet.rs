@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use std::{fs, io, path::PathBuf};
+use std::{env, fs, io, path::PathBuf};
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Cheatsheet {
@@ -9,7 +9,7 @@ pub struct Cheatsheet {
 }
 
 impl Cheatsheet {
-    pub fn display(&self, topic: &str) {
+    pub fn display_nocolor(&self, topic: &str) {
         println!("");
         if self.tags.len() > 0 {
             println!("[{}][{}] {}", topic, self.tags.join(" "), self.description);
@@ -24,14 +24,25 @@ impl Cheatsheet {
 
     pub fn display_colorized(&self, topic: &str) {
         println!("");
-        println!(
-            "\x1b[93;1m[{}]\x1b[0m\x1b[94;1m[{}]\x1b[0m",
-            topic,
-            self.tags.join(" ")
-        );
+        if self.tags.len() > 0 {
+            println!(
+                "\x1b[93;1m[{}]\x1b[0m\x1b[94;1m[{}]\x1b[0m",
+                topic,
+                self.tags.join(" ")
+            );
+        } else {
+            println!("\x1b[93;1m[{}]\x1b[0m", topic);
+        }
         println!("\x1b[92;1m#\x1b[0m {}", self.description);
         for d in self.data.iter() {
             println!("\x1b[92;1m>>>\x1b[0m \x1b[95m{}\x1b[0m", d);
+        }
+    }
+
+    pub fn display(&self, topic: &str) {
+        match env::var("KSEARCH_COLORED") {
+            Ok(_) => self.display_colorized(&topic),
+            _ => self.display_nocolor(&topic),
         }
     }
 }
@@ -45,43 +56,47 @@ pub fn from_file(path: &PathBuf) -> Vec<Cheatsheet> {
 
 pub fn find_topic(
     path: &PathBuf,
-    topic: &str,
     search: &Option<&String>,
     filter: &Option<&String>,
-) -> io::Result<()> {
+) -> io::Result<Vec<Cheatsheet>> {
     let ch = from_file(&path);
 
-    let matches: Vec<&Cheatsheet> = if let Some(f) = filter {
+    let matches: Vec<Cheatsheet> = if let Some(f) = filter {
         if let Some(s) = search {
             ch.iter()
                 .filter(|e| e.description.contains(*s) && e.tags.contains(f))
-                .map(|c| c)
+                .map(|c| c.clone())
                 .collect()
         } else {
             ch.iter()
                 .filter(|e| e.tags.contains(f))
-                .map(|c| c)
+                .map(|c| c.clone())
                 .collect()
         }
     } else {
         if let Some(s) = search {
             ch.iter()
                 .filter(|e| e.description.contains(*s))
-                .map(|c| c)
+                .map(|c| c.clone())
                 .collect()
         } else {
-            ch.iter().collect()
+            ch.iter().map(|c| c.clone()).collect()
         }
     };
 
-    for m in matches.iter() {
-        // XXX: check for COLORED env variable
-        // else call m.display(&topic)
-        m.display_colorized(&topic);
-    }
-    println!("");
+    Ok(matches)
+}
 
-    Ok(())
+pub fn show_topic(path: &PathBuf, topic: &str, search: &Option<&String>, filter: &Option<&String>) {
+    match find_topic(&path, &search, &filter) {
+        Ok(cheatsheets) => {
+            for ch in cheatsheets.iter() {
+                ch.display(&topic);
+            }
+            println!("");
+        }
+        _ => println!("No topic found."),
+    }
 }
 
 pub fn find_files(
@@ -103,7 +118,7 @@ pub fn find_files(
                         if inventory {
                             println!("{}", topic);
                         } else {
-                            let _ = find_topic(&p, &topic, &search, &filter);
+                            show_topic(&p, &topic, &search, &filter);
                         }
                     }
                     // XXX: Add log here

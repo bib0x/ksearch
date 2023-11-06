@@ -16,5 +16,14 @@
         "tags": [
             "git-submodule"
         ]
+    },
+    {
+        "description": "search for terms/string in commit message history",
+        "data": [
+            "git log --all --grep='\u003cmessage\u003e'",
+            "git log --grep='\u003cmessage\u003e'",
+            "git log --author='\u003cusername\u003e'"
+        ],
+        "tags": []
     }
 ]

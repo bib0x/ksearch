@@ -56,7 +56,7 @@ fn main() {
                     } else {
                         pathbuf.push(topic);
                         pathbuf.set_extension("json");
-                        let _ = cheatsheet::find_topic(&pathbuf, &topic, &search, &filter);
+                        cheatsheet::show_topic(&pathbuf, &topic, &search, &filter);
                     }
                 } else {
                     if inventory {
