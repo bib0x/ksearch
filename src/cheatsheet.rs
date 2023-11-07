@@ -11,19 +11,21 @@ pub struct Cheatsheet {
 impl Cheatsheet {
     pub fn display_nocolor(&self, topic: &str) {
         println!("");
+
         if self.tags.len() > 0 {
             println!("[{}][{}] {}", topic, self.tags.join(" "), self.description);
         } else {
             println!("[{}] {}", topic, self.description);
         }
+
         for d in self.data.iter() {
             println!("- {}", d);
         }
-        println!("");
     }
 
     pub fn display_colorized(&self, topic: &str) {
         println!("");
+
         if self.tags.len() > 0 {
             println!(
                 "\x1b[93;1m[{}]\x1b[0m\x1b[94;1m[{}]\x1b[0m",
@@ -33,7 +35,9 @@ impl Cheatsheet {
         } else {
             println!("\x1b[93;1m[{}]\x1b[0m", topic);
         }
+
         println!("\x1b[92;1m#\x1b[0m {}", self.description);
+
         for d in self.data.iter() {
             println!("\x1b[92;1m>>>\x1b[0m \x1b[95m{}\x1b[0m", d);
         }
@@ -54,7 +58,7 @@ pub fn from_file(path: &PathBuf) -> Vec<Cheatsheet> {
     ch
 }
 
-pub fn find_topic(
+fn parse_topic(
     path: &PathBuf,
     search: &Option<&String>,
     filter: &Option<&String>,
@@ -88,7 +92,7 @@ pub fn find_topic(
 }
 
 pub fn show_topic(path: &PathBuf, topic: &str, search: &Option<&String>, filter: &Option<&String>) {
-    match find_topic(&path, &search, &filter) {
+    match parse_topic(&path, &search, &filter) {
         Ok(cheatsheets) => {
             for ch in cheatsheets.iter() {
                 ch.display(&topic);
