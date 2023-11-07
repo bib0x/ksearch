@@ -92,12 +92,3 @@ $ KSEARCH_PATH=`pwd`/resources/ ksearch -G
 $ ls `pwd`/resources/json/
 pfsense.json
 ```
-
-## Todo
-
-- [ ] Tests
-- [ ] add comment to cheatsheet ?
-- [ ] output color
-- [ ] match output color
-- [x] manage CUE/JSON export via CLI
-- [x] test symbolic link
