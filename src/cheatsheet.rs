@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use std::{env, fs, io, path::PathBuf};
+use std::{env, fs, io, path::PathBuf, println};
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Cheatsheet {
@@ -9,7 +9,7 @@ pub struct Cheatsheet {
 }
 
 impl Cheatsheet {
-    pub fn display_nocolor(&self, topic: &str) {
+    fn display_nocolor(&self, topic: &str) {
         println!("");
 
         if self.tags.len() > 0 {
@@ -23,7 +23,7 @@ impl Cheatsheet {
         }
     }
 
-    pub fn display_colorized(&self, topic: &str) {
+    fn display_colorized(&self, topic: &str) {
         println!("");
 
         if self.tags.len() > 0 {
@@ -93,6 +93,13 @@ fn parse_topic(
     Ok(matches)
 }
 
+fn is_json_file(path: &PathBuf) -> bool {
+    match path.extension() {
+        Some(extension) => extension == "json",
+        None => false,
+    }
+}
+
 pub fn show_topic(cheatsheets: &Vec<Cheatsheet>, topic: &str, search: &str, filter: &str) {
     match parse_topic(&cheatsheets, &search, &filter) {
         Ok(cheatsheets) => {
@@ -109,23 +116,18 @@ pub fn find_files(path: &PathBuf, search: &str, filter: &str, inventory: bool) -
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         let p = entry.path();
-        if let Some(extension) = p.extension() {
-            if extension == "json" {
-                let mut pp = p.clone();
-                pp.set_extension("");
-
-                if let Some(topic_ostr) = pp.file_name() {
-                    if let Some(topic) = topic_ostr.to_str() {
-                        if inventory {
-                            println!("{}", topic);
-                        } else {
-                            let cheatsheets = from_file(&p);
-                            show_topic(&cheatsheets, &topic, &search, &filter);
-                        }
-                    }
-                    // XXX: Add log here
+        if is_json_file(&p) {
+            let tmp_path = p.clone();
+            // Safe to unwrap cause we checked that we got a file with a json extension previously
+            let topic_ostr = tmp_path.file_stem().unwrap();
+            if let Some(topic) = topic_ostr.to_str() {
+                if inventory {
+                    println!("{}", topic);
+                } else {
+                    let cheatsheets = from_file(&p);
+                    show_topic(&cheatsheets, &topic, &search, &filter);
                 }
-            }
+            } // XXX: Add Else and log
         }
     }
     Ok(())
