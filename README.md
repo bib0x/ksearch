@@ -2,7 +2,8 @@
 
 Ksearch stands for `knowledge search`. I am using different kind of place to store knowledge (zettelkasten, Firefox bookmarks, Gist...). The issue is that I tend to forget where I've stored all of this... 
 
-To solve this memory issue, I use this tool to index where I store my stuff.
+To solve this memory issue, I use this tool to index where I store my stuff.  
+However, it's a manual indexing process (where you have to write your CUE file) which is kind of slow.  
 
 Cheatsheets are defined using CUE language to generate JSON 
 files that could be parsed next by this tool.
