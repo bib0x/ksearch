@@ -24,13 +24,18 @@ fn main() {
     };
 
     let matches = cli::build_cli("ksearch").get_matches();
-    let search = matches.get_one::<String>("search");
-    let topic = matches.get_one::<String>("topic");
-    let filter = matches.get_one::<String>("filter");
+
+    // Safe to unwrap cause we set default value from .Arg() definitions
+    let search: String = matches.get_one::<String>("search").unwrap().to_string();
+    let topic: String = matches.get_one::<String>("topic").unwrap().to_string();
+    let filter: String = matches.get_one::<String>("filter").unwrap().to_string();
+
     let env = matches.get_flag("env");
     let show_path = matches.get_flag("path");
     let generate_flag = matches.get_flag("generate");
     let inventory = matches.get_flag("inventory");
+
+    let has_topic = topic.len() > 0;
 
     if env {
         println!("KSEARCH={}", csheet_paths.as_str());
@@ -50,19 +55,21 @@ fn main() {
                 }
             } else {
                 pathbuf.push("json");
-                if let Some(topic) = topic {
+                if has_topic {
                     if show_path {
                         let _ = show_paths(&pathbuf, &topic);
                     } else {
-                        pathbuf.push(topic);
+                        pathbuf.push(topic.clone());
                         pathbuf.set_extension("json");
-                        cheatsheet::show_topic(&pathbuf, &topic, &search, &filter);
+
+                        let cheatsheets = cheatsheet::from_file(&pathbuf);
+                        cheatsheet::show_topic(&cheatsheets, &topic, &search, &filter);
                     }
                 } else {
                     if inventory {
                         println!("{}", pathbuf.display());
-                        let _ = cheatsheet::find_files(&pathbuf, &None, &None, inventory);
-                        println!("")
+                        let _ = cheatsheet::find_files(&pathbuf, "", "", inventory);
+                        println!("");
                     } else {
                         let _ = cheatsheet::find_files(&pathbuf, &search, &filter, inventory);
                     }

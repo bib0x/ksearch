@@ -59,40 +59,44 @@ pub fn from_file(path: &PathBuf) -> Vec<Cheatsheet> {
 }
 
 fn parse_topic(
-    path: &PathBuf,
-    search: &Option<&String>,
-    filter: &Option<&String>,
+    cheatsheets: &Vec<Cheatsheet>,
+    search: &str,
+    filter: &str,
 ) -> io::Result<Vec<Cheatsheet>> {
-    let ch = from_file(&path);
+    //let ch = from_file(&path);
 
-    let matches: Vec<Cheatsheet> = if let Some(f) = filter {
-        if let Some(s) = search {
-            ch.iter()
-                .filter(|e| e.description.contains(*s) && e.tags.contains(f))
+    let matches: Vec<Cheatsheet> = if filter.len() > 0 {
+        let f = String::from(filter.clone());
+        if search.len() > 0 {
+            cheatsheets
+                .iter()
+                .filter(|e| e.description.contains(search) && e.tags.contains(&f))
                 .map(|c| c.clone())
                 .collect()
         } else {
-            ch.iter()
-                .filter(|e| e.tags.contains(f))
+            cheatsheets
+                .iter()
+                .filter(|e| e.tags.contains(&f))
                 .map(|c| c.clone())
                 .collect()
         }
     } else {
-        if let Some(s) = search {
-            ch.iter()
-                .filter(|e| e.description.contains(*s))
+        if search.len() > 0 {
+            cheatsheets
+                .iter()
+                .filter(|e| e.description.contains(search))
                 .map(|c| c.clone())
                 .collect()
         } else {
-            ch.iter().map(|c| c.clone()).collect()
+            cheatsheets.iter().map(|c| c.clone()).collect()
         }
     };
 
     Ok(matches)
 }
 
-pub fn show_topic(path: &PathBuf, topic: &str, search: &Option<&String>, filter: &Option<&String>) {
-    match parse_topic(&path, &search, &filter) {
+pub fn show_topic(cheatsheets: &Vec<Cheatsheet>, topic: &str, search: &str, filter: &str) {
+    match parse_topic(&cheatsheets, &search, &filter) {
         Ok(cheatsheets) => {
             for ch in cheatsheets.iter() {
                 ch.display(&topic);
@@ -103,12 +107,7 @@ pub fn show_topic(path: &PathBuf, topic: &str, search: &Option<&String>, filter:
     }
 }
 
-pub fn find_files(
-    path: &PathBuf,
-    search: &Option<&String>,
-    filter: &Option<&String>,
-    inventory: bool,
-) -> io::Result<()> {
+pub fn find_files(path: &PathBuf, search: &str, filter: &str, inventory: bool) -> io::Result<()> {
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         let p = entry.path();
@@ -122,7 +121,8 @@ pub fn find_files(
                         if inventory {
                             println!("{}", topic);
                         } else {
-                            show_topic(&p, &topic, &search, &filter);
+                            let cheatsheets = from_file(&p);
+                            show_topic(&cheatsheets, &topic, &search, &filter);
                         }
                     }
                     // XXX: Add log here
@@ -131,4 +131,102 @@ pub fn find_files(
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    fn get_git_cheatsheet() -> Vec<Cheatsheet> {
+        let json = r#"[
+    {
+        "description": "quick show branch and file changes",
+        "data": [
+            "git status -s -b"
+        ],
+        "tags": [
+            "git-status"
+        ]
+    },
+    {
+        "description": "quick show submodules status",
+        "data": [
+            "git submodule status"
+        ],
+        "tags": [
+            "git-submodule"
+        ]
+    },
+    {
+        "description": "search for terms/string in commit message history",
+        "data": [
+            "git log --all --grep='\u003cmessage\u003e'",
+            "git log --grep='\u003cmessage\u003e'",
+            "git log --author='\u003cusername\u003e'"
+        ],
+        "tags": []
+    }
+]"#;
+        let cheatsheets: Vec<Cheatsheet> = serde_json::from_str(json).unwrap();
+        cheatsheets
+    }
+
+    #[test]
+    fn test_git_cheatsheet_without_filter_should_return_one() {
+        let cheatsheets = get_git_cheatsheet();
+        let search = "branch";
+        let filter = "";
+        match parse_topic(&cheatsheets, &search, &filter) {
+            Ok(res) => {
+                assert_eq!(res.len(), 1);
+                assert_eq!(res[0].data, ["git status -s -b"]);
+                assert_eq!(res[0].tags, ["git-status"]);
+            }
+            Err(_) => panic!("test failed"),
+        }
+    }
+
+    #[test]
+    fn test_git_cheatsheet_without_filter_should_return_two() {
+        let cheatsheets = get_git_cheatsheet();
+        let search = "quick";
+        let filter = "";
+        match parse_topic(&cheatsheets, &search, &filter) {
+            Ok(res) => {
+                assert_eq!(res.len(), 2);
+                assert_eq!(res[0].data, ["git status -s -b"]);
+                assert_eq!(res[0].tags, ["git-status"]);
+            }
+            Err(_) => panic!("test failed"),
+        }
+    }
+
+    #[test]
+    fn test_git_cheatsheet_with_filter_should_return_one() {
+        let cheatsheets = get_git_cheatsheet();
+        let search = "";
+        let filter = "git-status";
+        match parse_topic(&cheatsheets, &search, &filter) {
+            Ok(res) => {
+                assert_eq!(res.len(), 1);
+                assert_eq!(res[0].data, ["git status -s -b"]);
+                assert_eq!(res[0].tags, ["git-status"]);
+            }
+            Err(_) => panic!("test failed"),
+        }
+    }
+
+    #[test]
+    fn test_git_cheatsheet_without_search_or_filter_should_return_three() {
+        let cheatsheets = get_git_cheatsheet();
+        let search = "";
+        let filter = "";
+        match parse_topic(&cheatsheets, &search, &filter) {
+            Ok(res) => {
+                assert_eq!(res.len(), 3);
+            }
+            Err(_) => panic!("test failed"),
+        }
+    }
 }

@@ -7,18 +7,21 @@ pub fn build_cli(program_name: &'static str) -> Command {
             Arg::new("search")
                 .long("search")
                 .short('s')
+                .default_value("")
                 .help("Term to search"),
         )
         .arg(
             Arg::new("topic")
                 .long("topic")
                 .short('t')
+                .default_value("")
                 .help("Targeted search topic"),
         )
         .arg(
             Arg::new("filter")
                 .long("filter")
                 .short('f')
+                .default_value("")
                 .help("Search filters such as tags"),
         )
         .arg(
