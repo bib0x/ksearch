@@ -30,14 +30,14 @@ fn main() {
     let topic: String = matches.get_one::<String>("topic").unwrap().to_string();
     let filter: String = matches.get_one::<String>("filter").unwrap().to_string();
 
-    let env = matches.get_flag("env");
-    let show_path = matches.get_flag("path");
+    let env_flag = matches.get_flag("env");
+    let path_flag = matches.get_flag("path");
     let generate_flag = matches.get_flag("generate");
-    let inventory = matches.get_flag("inventory");
+    let inventory_flag = matches.get_flag("inventory");
 
     let has_topic = topic.len() > 0;
 
-    if env {
+    if env_flag {
         println!("KSEARCH={}", csheet_paths.as_str());
     } else {
         for path in csheet_paths.split(":") {
@@ -51,7 +51,7 @@ fn main() {
             } else {
                 let mut jsonpath = Path::new(path).join("json");
                 if has_topic {
-                    if show_path {
+                    if path_flag {
                         let _ = show_paths(&jsonpath, &topic);
                     } else {
                         jsonpath.push(topic.clone());
@@ -61,12 +61,12 @@ fn main() {
                         cheatsheet::show_topic(&cheatsheets, &topic, &search, &filter);
                     }
                 } else {
-                    if inventory {
+                    if inventory_flag {
                         println!("{}", jsonpath.display());
-                        let _ = cheatsheet::find_files(&jsonpath, "", "", inventory);
+                        let _ = cheatsheet::find_files(&jsonpath, "", "", inventory_flag);
                         println!("");
                     } else {
-                        let _ = cheatsheet::find_files(&jsonpath, &search, &filter, inventory);
+                        let _ = cheatsheet::find_files(&jsonpath, &search, &filter, inventory_flag);
                     }
                 }
             }

@@ -112,7 +112,12 @@ pub fn show_topic(cheatsheets: &Vec<Cheatsheet>, topic: &str, search: &str, filt
     }
 }
 
-pub fn find_files(path: &PathBuf, search: &str, filter: &str, inventory: bool) -> io::Result<()> {
+pub fn find_files(
+    path: &PathBuf,
+    search: &str,
+    filter: &str,
+    inventory_flag: bool,
+) -> io::Result<()> {
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         let p = entry.path();
@@ -121,7 +126,7 @@ pub fn find_files(path: &PathBuf, search: &str, filter: &str, inventory: bool) -
             // Safe to unwrap cause we checked that we got a file with a json extension previously
             let topic_ostr = tmp_path.file_stem().unwrap();
             if let Some(topic) = topic_ostr.to_str() {
-                if inventory {
+                if inventory_flag {
                     println!("{}", topic);
                 } else {
                     let cheatsheets = from_file(&p);
