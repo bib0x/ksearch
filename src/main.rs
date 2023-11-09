@@ -1,4 +1,4 @@
-use std::{env, io, path::PathBuf, process::exit};
+use std::{env, io, path::Path, path::PathBuf, process::exit};
 
 mod cheatsheet;
 mod cli;
@@ -41,37 +41,32 @@ fn main() {
         println!("KSEARCH={}", csheet_paths.as_str());
     } else {
         for path in csheet_paths.split(":") {
-            let mut pathbuf = PathBuf::new();
-            pathbuf.push(path);
-
             if generate_flag {
-                let mut cuepath = pathbuf.clone();
-                let mut jsonpath = pathbuf.clone();
-                cuepath.push("cue");
-                jsonpath.push("json");
+                let cuepath = Path::new(path).join("cue");
+                let jsonpath = Path::new(path).join("json");
                 if let Err(_) = cue::export_as_json(&cuepath, &jsonpath) {
                     eprintln!("Cue export to json failed for {}", cuepath.display());
                     exit(1);
                 }
             } else {
-                pathbuf.push("json");
+                let mut jsonpath = Path::new(path).join("json");
                 if has_topic {
                     if show_path {
-                        let _ = show_paths(&pathbuf, &topic);
+                        let _ = show_paths(&jsonpath, &topic);
                     } else {
-                        pathbuf.push(topic.clone());
-                        pathbuf.set_extension("json");
+                        jsonpath.push(topic.clone());
+                        jsonpath.set_extension("json");
 
-                        let cheatsheets = cheatsheet::from_file(&pathbuf);
+                        let cheatsheets = cheatsheet::from_file(&jsonpath);
                         cheatsheet::show_topic(&cheatsheets, &topic, &search, &filter);
                     }
                 } else {
                     if inventory {
-                        println!("{}", pathbuf.display());
-                        let _ = cheatsheet::find_files(&pathbuf, "", "", inventory);
+                        println!("{}", jsonpath.display());
+                        let _ = cheatsheet::find_files(&jsonpath, "", "", inventory);
                         println!("");
                     } else {
-                        let _ = cheatsheet::find_files(&pathbuf, &search, &filter, inventory);
+                        let _ = cheatsheet::find_files(&jsonpath, &search, &filter, inventory);
                     }
                 }
             }
