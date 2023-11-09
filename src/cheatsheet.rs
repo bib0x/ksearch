@@ -63,8 +63,6 @@ fn parse_topic(
     search: &str,
     filter: &str,
 ) -> io::Result<Vec<Cheatsheet>> {
-    //let ch = from_file(&path);
-
     let matches: Vec<Cheatsheet> = if filter.len() > 0 {
         let f = String::from(filter.clone());
         if search.len() > 0 {
@@ -135,7 +133,6 @@ pub fn find_files(path: &PathBuf, search: &str, filter: &str, inventory: bool) -
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     fn get_git_cheatsheet() -> Vec<Cheatsheet> {
