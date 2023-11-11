@@ -23,7 +23,8 @@ Options:
   -p, --path             Show topic path if exist
   -G, --generate         Generate CUE notes as JSON file
   -i, --inventory        List all available topics
-  -m, --match-color      List all available topics
+  -m, --match-color      Enable colored match
+  -l, --list             List all CUE files with fullpath
   -h, --help             Print help
 ```
 
@@ -42,6 +43,7 @@ $ ksearch -t <topic> -p
 $ ksearch -e
 $ ksearch -i
 $ ksearch --generate
+$ ksearch -l
 ```
 
 ![Search without colored output](./examples/search_without_color.png "Search without color")
@@ -106,4 +108,12 @@ EOF
 $ KSEARCH_PATH=`pwd`/resources/ ksearch -G
 $ ls `pwd`/resources/json/
 pfsense.json
+```
+
+## BONUS
+
+It's possible to use fzf to have so kind of searchable frontend to edit or view CUE files
+
+```
+$ KSEARCH_PATH=`pwd`/resources/tests ./target/debug/ksearch -l | fzf -e --preview 'bat -l go --style changes,header --color=always --line-range :500 {}' --bind 'ctrl-e:become($EDITOR {+})'  --bind 'enter:become(bat -l go --style changes,header --color=always {})'
 ```

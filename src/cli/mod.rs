@@ -59,6 +59,13 @@ pub fn build_cli(program_name: &'static str) -> Command {
                 .action(ArgAction::SetTrue)
                 .help("Enable colored match"),
         )
+        .arg(
+            Arg::new("list")
+                .long("list")
+                .short('l')
+                .action(ArgAction::SetTrue)
+                .help("List all CUE files with fullpath"),
+        )
 }
 
 #[test]

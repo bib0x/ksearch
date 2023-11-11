@@ -35,6 +35,7 @@ fn main() {
     let generate_flag = matches.get_flag("generate");
     let inventory_flag = matches.get_flag("inventory");
     let match_color_flag = matches.get_flag("match_color");
+    let list_cue_flag = matches.get_flag("list");
 
     let has_topic = topic.len() > 0;
 
@@ -53,6 +54,9 @@ fn main() {
                     eprintln!("Cue export to json failed for {}", cuepath.display());
                     exit(1);
                 }
+            } else if list_cue_flag {
+                let cuepath = Path::new(path).join("cue");
+                let _ = cue::list_fullpath(&cuepath);
             } else {
                 let mut jsonpath = Path::new(path).join("json");
                 if has_topic {
