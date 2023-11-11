@@ -1,8 +1,10 @@
+use clap::crate_version;
 use clap::{Arg, ArgAction, Command};
 
 pub fn build_cli(program_name: &'static str) -> Command {
     Command::new(program_name)
         .about("CLI to search knowledge from JSON files")
+        .version(crate_version!())
         .arg(
             Arg::new("search")
                 .long("search")
