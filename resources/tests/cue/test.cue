@@ -1,27 +1,27 @@
 package main
 
 import (
-  "bib0x.github.com/schema"
+	"bib0x.github.com/schema"
 )
 
 [
-  schema.#Cheat & { 
-    description: "show routes", 
-    data: [ 
-      "netstat -rWn", 
-    ] 
-    tags: [
-      "netstat", 
-    ] 
-  },
-  schema.#Cheat & { 
-    description: "show rules", 
-    data: [ 
-      "pfctl -sr", 
-    ], 
-    tags: [
-      "pfctl", 
-      "firewall"
-    ] 
-  },
+	schema.#Knowledge & {
+		description: "show routes"
+		data: [
+			"netstat -rWn",
+		]
+		tags: [
+			"netstat",
+		]
+	},
+	schema.#Knowledge & {
+		description: "show rules"
+		data: [
+			"pfctl -sr",
+		]
+		tags: [
+			"pfctl",
+			"firewall",
+		]
+	},
 ]

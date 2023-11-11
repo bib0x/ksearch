@@ -2,13 +2,13 @@ use serde::Deserialize;
 use std::{env, fs, io, path::PathBuf, println};
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct Cheatsheet {
+pub struct Knowledge {
     pub description: String,
     pub data: Vec<String>,
     pub tags: Vec<String>,
 }
 
-impl Cheatsheet {
+impl Knowledge {
     fn colorized_match(&self, search: &str) -> String {
         let colorized_search = format!("\x1b[91;1m{}\x1b[0m", search);
         return self.description.replace(search, &colorized_search);
@@ -68,28 +68,28 @@ impl Cheatsheet {
     }
 }
 
-pub fn from_file(path: &PathBuf) -> Vec<Cheatsheet> {
+pub fn from_file(path: &PathBuf) -> Vec<Knowledge> {
     let json_file = fs::File::open(path).expect("file should open read only");
-    let ch: Vec<Cheatsheet> =
+    let ch: Vec<Knowledge> =
         serde_json::from_reader(json_file).expect("file should be proper json");
     ch
 }
 
 fn parse_topic(
-    cheatsheets: &Vec<Cheatsheet>,
+    knowledges: &Vec<Knowledge>,
     search: &str,
     filter: &str,
-) -> io::Result<Vec<Cheatsheet>> {
-    let matches: Vec<Cheatsheet> = if filter.len() > 0 {
+) -> io::Result<Vec<Knowledge>> {
+    let matches: Vec<Knowledge> = if filter.len() > 0 {
         let f = String::from(filter.clone());
         if search.len() > 0 {
-            cheatsheets
+            knowledges
                 .iter()
                 .filter(|e| e.description.contains(search) && e.tags.contains(&f))
                 .map(|c| c.clone())
                 .collect()
         } else {
-            cheatsheets
+            knowledges
                 .iter()
                 .filter(|e| e.tags.contains(&f))
                 .map(|c| c.clone())
@@ -97,13 +97,13 @@ fn parse_topic(
         }
     } else {
         if search.len() > 0 {
-            cheatsheets
+            knowledges
                 .iter()
                 .filter(|e| e.description.contains(search))
                 .map(|c| c.clone())
                 .collect()
         } else {
-            cheatsheets.iter().map(|c| c.clone()).collect()
+            knowledges.iter().map(|c| c.clone()).collect()
         }
     };
 
@@ -118,15 +118,15 @@ fn is_json_file(path: &PathBuf) -> bool {
 }
 
 pub fn show_topic(
-    cheatsheets: &Vec<Cheatsheet>,
+    knowledges: &Vec<Knowledge>,
     topic: &str,
     search: &str,
     filter: &str,
     match_colored: bool,
 ) {
-    match parse_topic(&cheatsheets, &search, &filter) {
-        Ok(cheatsheets) => {
-            for ch in cheatsheets.iter() {
+    match parse_topic(&knowledges, &search, &filter) {
+        Ok(knowledges) => {
+            for ch in knowledges.iter() {
                 ch.display(&topic, &search, match_colored);
             }
             println!("");
@@ -153,8 +153,8 @@ pub fn find_files(
                 if inventory_flag {
                     println!("{}", topic);
                 } else {
-                    let cheatsheets = from_file(&p);
-                    show_topic(&cheatsheets, &topic, &search, &filter, match_colored);
+                    let knowledges = from_file(&p);
+                    show_topic(&knowledges, &topic, &search, &filter, match_colored);
                 }
             } // XXX: Add Else and log
         }
@@ -166,7 +166,7 @@ pub fn find_files(
 mod tests {
     use super::*;
 
-    fn get_git_cheatsheet() -> Vec<Cheatsheet> {
+    fn get_git_knowledge() -> Vec<Knowledge> {
         let json = r#"[
     {
         "description": "quick show branch and file changes",
@@ -196,16 +196,16 @@ mod tests {
         "tags": []
     }
 ]"#;
-        let cheatsheets: Vec<Cheatsheet> = serde_json::from_str(json).unwrap();
-        cheatsheets
+        let knowledges: Vec<Knowledge> = serde_json::from_str(json).unwrap();
+        knowledges
     }
 
     #[test]
-    fn test_git_cheatsheet_without_filter_should_return_one() {
-        let cheatsheets = get_git_cheatsheet();
+    fn test_git_knowledge_without_filter_should_return_one() {
+        let knowledges = get_git_knowledge();
         let search = "branch";
         let filter = "";
-        match parse_topic(&cheatsheets, &search, &filter) {
+        match parse_topic(&knowledges, &search, &filter) {
             Ok(res) => {
                 assert_eq!(res.len(), 1);
                 assert_eq!(res[0].data, ["git status -s -b"]);
@@ -216,11 +216,11 @@ mod tests {
     }
 
     #[test]
-    fn test_git_cheatsheet_without_filter_should_return_two() {
-        let cheatsheets = get_git_cheatsheet();
+    fn test_git_knowledge_without_filter_should_return_two() {
+        let knowledges = get_git_knowledge();
         let search = "quick";
         let filter = "";
-        match parse_topic(&cheatsheets, &search, &filter) {
+        match parse_topic(&knowledges, &search, &filter) {
             Ok(res) => {
                 assert_eq!(res.len(), 2);
                 assert_eq!(res[0].data, ["git status -s -b"]);
@@ -231,11 +231,11 @@ mod tests {
     }
 
     #[test]
-    fn test_git_cheatsheet_with_filter_should_return_one() {
-        let cheatsheets = get_git_cheatsheet();
+    fn test_git_knowledge_with_filter_should_return_one() {
+        let knowledges = get_git_knowledge();
         let search = "";
         let filter = "git-status";
-        match parse_topic(&cheatsheets, &search, &filter) {
+        match parse_topic(&knowledges, &search, &filter) {
             Ok(res) => {
                 assert_eq!(res.len(), 1);
                 assert_eq!(res[0].data, ["git status -s -b"]);
@@ -246,11 +246,11 @@ mod tests {
     }
 
     #[test]
-    fn test_git_cheatsheet_without_search_or_filter_should_return_three() {
-        let cheatsheets = get_git_cheatsheet();
+    fn test_git_knowledge_without_search_or_filter_should_return_three() {
+        let knowledges = get_git_knowledge();
         let search = "";
         let filter = "";
-        match parse_topic(&cheatsheets, &search, &filter) {
+        match parse_topic(&knowledges, &search, &filter) {
             Ok(res) => {
                 assert_eq!(res.len(), 3);
             }

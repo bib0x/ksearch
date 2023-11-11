@@ -2,7 +2,7 @@ use clap::{Arg, ArgAction, Command};
 
 pub fn build_cli(program_name: &'static str) -> Command {
     Command::new(program_name)
-        .about("CLI to search knowlege from JSON cheatsheets")
+        .about("CLI to search knowledge from JSON files")
         .arg(
             Arg::new("search")
                 .long("search")
@@ -43,7 +43,7 @@ pub fn build_cli(program_name: &'static str) -> Command {
                 .long("generate")
                 .short('G')
                 .action(ArgAction::SetTrue)
-                .help("Generate CUE notes as JSON file"),
+                .help("Generate CUE datastructures as JSON file"),
         )
         .arg(
             Arg::new("inventory")

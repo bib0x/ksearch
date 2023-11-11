@@ -5,7 +5,7 @@ import (
 )
 
 [
-	schema.#Cheat & {
+	schema.#Knowledge & {
 		description: "quick show branch and file changes"
 		data: [
 			"git status -s -b",
@@ -14,7 +14,7 @@ import (
 			"git-status",
 		]
 	},
-	schema.#Cheat & {
+	schema.#Knowledge & {
 		description: "quick show submodules status"
 		data: [
 			"git submodule status",
@@ -23,7 +23,7 @@ import (
 			"git-submodule",
 		]
 	},
-	schema.#Cheat & {
+	schema.#Knowledge & {
 		description: "search for terms/string in commit message history"
 		data: [
 			"git log --all --grep='<message>'",

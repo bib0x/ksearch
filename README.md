@@ -5,13 +5,13 @@ Ksearch stands for `knowledge search`. I am using different kind of place to sto
 To solve this memory issue, I use this tool to index where I store my stuff.  
 However, it's a manual indexing process (where you have to write your CUE file) which is kind of slow.  
 
-Cheatsheets are defined using CUE language to generate JSON 
+Knowledges are defined using CUE language to generate JSON 
 files that could be parsed next by this tool.
 
 ## Usage
 
 ```
-CLI to search knowlege from JSON cheatsheets
+CLI to search knowlege from JSON files
 
 Usage: ksearch [OPTIONS]
 
@@ -30,7 +30,7 @@ Options:
 
 ## Environment variables
 
-- `KSEARCH_PATH` paths for where to find JSON cheatsheets
+- `KSEARCH_PATH` paths for where to find JSON files
 - `KSEARCH_COLORED` if defined (whatever the value) it will activate colored output
 
 ## Example
@@ -60,20 +60,20 @@ $ pwd
 $ mkdir -p resources/{cue,json}
 $ cd resources/cue
 
-# Create cue module with `Cheats` datastructure
+# Create cue module with `Knowledges` datastructure
 $ cue mod init bib0x.github.com
 $ mkdir schema
-$ cat > schema/cheats.cue <<EOF
+$ cat > schema/knowledges.cue <<EOF
 package schema
 
-#Cheat: {
+#Knowledge: {
     description: string
     data: [...string]
     tags: [...string]
 }
 EOF
 
-# Create a cheatsheet
+# Create a knowledge
 $ cat > pfsense.cue <<EOF
 package main
 
@@ -82,7 +82,7 @@ import (
 )
 
 [
-  schema.#Cheat & {
+  schema.#Knowledge & {
     description: "show routes",
     data: [
       "netstat -rWn",
@@ -91,7 +91,7 @@ import (
       "netstat",
     ]
   },
-  schema.#Cheat & {
+  schema.#Knowledge & {
     description: "show rules",
     data: [
       "pfctl -sr",

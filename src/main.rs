@@ -1,8 +1,8 @@
 use std::{env, io, path::Path, path::PathBuf, process::exit};
 
-mod cheatsheet;
 mod cli;
 mod cue;
+mod knowledge;
 
 pub fn show_paths(path: &PathBuf, topic: &str) -> io::Result<()> {
     let mut p = path.clone();
@@ -66,9 +66,9 @@ fn main() {
                         jsonpath.push(topic.clone());
                         jsonpath.set_extension("json");
 
-                        let cheatsheets = cheatsheet::from_file(&jsonpath);
-                        cheatsheet::show_topic(
-                            &cheatsheets,
+                        let knowledges = knowledge::from_file(&jsonpath);
+                        knowledge::show_topic(
+                            &knowledges,
                             &topic,
                             &search,
                             &filter,
@@ -78,7 +78,7 @@ fn main() {
                 } else {
                     if inventory_flag {
                         println!("{}", jsonpath.display());
-                        let _ = cheatsheet::find_files(
+                        let _ = knowledge::find_files(
                             &jsonpath,
                             "",
                             "",
@@ -87,7 +87,7 @@ fn main() {
                         );
                         println!("");
                     } else {
-                        let _ = cheatsheet::find_files(
+                        let _ = knowledge::find_files(
                             &jsonpath,
                             &search,
                             &filter,
