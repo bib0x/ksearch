@@ -1,17 +1,19 @@
-use std::{env, io, path::Path, path::PathBuf, process::exit};
+use std::{env, path::Path, path::PathBuf, process::exit};
 
 mod cli;
 mod cue;
 mod knowledge;
 
-pub fn show_paths(path: &PathBuf, topic: &str) -> io::Result<()> {
-    let mut p = path.clone();
-    p.push(topic);
+pub fn topic_exists(path: &PathBuf, topic: &str) -> bool {
+    let mut p = Path::new(path).join(topic);
     p.set_extension("json");
-    if p.exists() {
-        println!("{}", p.display());
+    p.exists()
+}
+
+pub fn show_paths(path: &PathBuf, topic: &str) {
+    if topic_exists(&path, &topic) {
+        println!("{}", path.display());
     }
-    Ok(())
 }
 
 fn main() {
@@ -62,20 +64,23 @@ fn main() {
             } else {
                 let mut jsonpath = Path::new(path).join("json");
                 if has_topic {
-                    if path_flag {
-                        let _ = show_paths(&jsonpath, &topic);
+                    if !topic_exists(&jsonpath, &topic) {
+                        println!("Unknown topic named '{}'", topic);
                     } else {
-                        jsonpath.push(topic.clone());
-                        jsonpath.set_extension("json");
-
-                        let knowledges = knowledge::from_file(&jsonpath);
-                        knowledges_found = knowledge::show_topic(
-                            &knowledges,
-                            &topic,
-                            &search,
-                            &filter,
-                            match_color_flag,
-                        );
+                        if path_flag {
+                            show_paths(&jsonpath, &topic);
+                        } else {
+                            jsonpath.push(topic.clone());
+                            jsonpath.set_extension("json");
+                            let knowledges = knowledge::from_file(&jsonpath);
+                            knowledges_found = knowledge::show_topic(
+                                &knowledges,
+                                &topic,
+                                &search,
+                                &filter,
+                                match_color_flag,
+                            );
+                        }
                     }
                 } else {
                     if inventory_flag {
