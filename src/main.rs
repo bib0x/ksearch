@@ -39,6 +39,8 @@ fn main() {
 
     let has_topic = topic.len() > 0;
 
+    let mut knowledges_found = false;
+
     if env_flag {
         println!("KSEARCH_PATH={}", csheet_paths.as_str());
         match env::var("KSEARCH_COLORED") {
@@ -67,7 +69,7 @@ fn main() {
                         jsonpath.set_extension("json");
 
                         let knowledges = knowledge::from_file(&jsonpath);
-                        knowledge::show_topic(
+                        knowledges_found = knowledge::show_topic(
                             &knowledges,
                             &topic,
                             &search,
@@ -77,6 +79,7 @@ fn main() {
                     }
                 } else {
                     if inventory_flag {
+                        println!("");
                         println!("{}", jsonpath.display());
                         let _ = knowledge::find_files(
                             &jsonpath,
@@ -87,16 +90,23 @@ fn main() {
                         );
                         println!("");
                     } else {
-                        let _ = knowledge::find_files(
+                        let res = knowledge::find_files(
                             &jsonpath,
                             &search,
                             &filter,
                             inventory_flag,
                             match_color_flag,
                         );
+
+                        if res.is_ok() {
+                            knowledges_found = true;
+                        }
                     }
                 }
             }
+        }
+        if knowledges_found {
+            println!("");
         }
     }
 }

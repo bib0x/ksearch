@@ -123,16 +123,18 @@ pub fn show_topic(
     search: &str,
     filter: &str,
     match_colored: bool,
-) {
+) -> bool {
+    let mut knowledges_found = false;
     match parse_topic(&knowledges, &search, &filter) {
         Ok(knowledges) => {
+            knowledges_found = true;
             for ch in knowledges.iter() {
                 ch.display(&topic, &search, match_colored);
             }
-            println!("");
         }
         _ => println!("No topic found."),
     }
+    knowledges_found
 }
 
 pub fn find_files(
@@ -141,7 +143,8 @@ pub fn find_files(
     filter: &str,
     inventory_flag: bool,
     match_colored: bool,
-) -> io::Result<()> {
+) -> io::Result<bool> {
+    let mut knowledges_found = false;
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         let p = entry.path();
@@ -154,12 +157,13 @@ pub fn find_files(
                     println!("{}", topic);
                 } else {
                     let knowledges = from_file(&p);
-                    show_topic(&knowledges, &topic, &search, &filter, match_colored);
+                    knowledges_found =
+                        show_topic(&knowledges, &topic, &search, &filter, match_colored);
                 }
             } // XXX: Add Else and log
         }
     }
-    Ok(())
+    Ok(knowledges_found)
 }
 
 #[cfg(test)]
