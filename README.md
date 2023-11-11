@@ -16,21 +16,31 @@ CLI to search knowlege from JSON cheatsheets
 Usage: ksearch [OPTIONS]
 
 Options:
-  -s, --search <search>  Term to search
-  -t, --topic <topic>    Targeted search topic
-  -f, --filter <filter>  Search filters such as tags
+  -s, --search <search>  Term to search [default: ]
+  -t, --topic <topic>    Targeted search topic [default: ]
+  -f, --filter <filter>  Search filters such as tags [default: ]
   -e, --environment      Show environment variable
   -p, --path             Show topic path if exist
   -G, --generate         Generate CUE notes as JSON file
+  -i, --inventory        List all available topics
+  -m, --match-color      List all available topics
   -h, --help             Print help
 ```
+
+## Environment variables
+
+- `KSEARCH_PATH` paths for where to find JSON cheatsheets
+- `KSEARCH_COLORED` if defined (whatever the value) it will activate colored output
 
 ## Example
 
 ```
 $ ksearch -s <term> -t <topic> -f <tags>
+$ ksearch -s <term> -m
+$ ksearch -s <term> -t <topic> -m
 $ ksearch -t <topic> -p
 $ ksearch -e
+$ ksearch -i
 $ ksearch --generate
 ```
 

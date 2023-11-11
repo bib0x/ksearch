@@ -34,11 +34,16 @@ fn main() {
     let path_flag = matches.get_flag("path");
     let generate_flag = matches.get_flag("generate");
     let inventory_flag = matches.get_flag("inventory");
+    let match_color_flag = matches.get_flag("match_color");
 
     let has_topic = topic.len() > 0;
 
     if env_flag {
-        println!("KSEARCH={}", csheet_paths.as_str());
+        println!("KSEARCH_PATH={}", csheet_paths.as_str());
+        match env::var("KSEARCH_COLORED") {
+            Ok(_) => println!("KSEARCH_COLORED OK"),
+            _ => println!("KSEARCH_COLORED KO"),
+        }
     } else {
         for path in csheet_paths.split(":") {
             if generate_flag {
@@ -58,15 +63,33 @@ fn main() {
                         jsonpath.set_extension("json");
 
                         let cheatsheets = cheatsheet::from_file(&jsonpath);
-                        cheatsheet::show_topic(&cheatsheets, &topic, &search, &filter);
+                        cheatsheet::show_topic(
+                            &cheatsheets,
+                            &topic,
+                            &search,
+                            &filter,
+                            match_color_flag,
+                        );
                     }
                 } else {
                     if inventory_flag {
                         println!("{}", jsonpath.display());
-                        let _ = cheatsheet::find_files(&jsonpath, "", "", inventory_flag);
+                        let _ = cheatsheet::find_files(
+                            &jsonpath,
+                            "",
+                            "",
+                            inventory_flag,
+                            match_color_flag,
+                        );
                         println!("");
                     } else {
-                        let _ = cheatsheet::find_files(&jsonpath, &search, &filter, inventory_flag);
+                        let _ = cheatsheet::find_files(
+                            &jsonpath,
+                            &search,
+                            &filter,
+                            inventory_flag,
+                            match_color_flag,
+                        );
                     }
                 }
             }

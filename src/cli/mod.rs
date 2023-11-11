@@ -52,6 +52,13 @@ pub fn build_cli(program_name: &'static str) -> Command {
                 .action(ArgAction::SetTrue)
                 .help("List all available topics"),
         )
+        .arg(
+            Arg::new("match_color")
+                .long("match-color")
+                .short('m')
+                .action(ArgAction::SetTrue)
+                .help("Enable colored match"),
+        )
 }
 
 #[test]

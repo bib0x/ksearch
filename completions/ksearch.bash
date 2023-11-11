@@ -19,7 +19,7 @@ _ksearch() {
 
     case "${cmd}" in
         ksearch)
-            opts="-s -t -f -e -p -G -i -h --search --topic --filter --environment --path --generate --inventory --help"
+            opts="-s -t -f -e -p -G -i -m -h --search --topic --filter --environment --path --generate --inventory --match-color --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0

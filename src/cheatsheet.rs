@@ -9,13 +9,24 @@ pub struct Cheatsheet {
 }
 
 impl Cheatsheet {
-    fn display_nocolor(&self, topic: &str) {
+    fn colorized_match(&self, search: &str) -> String {
+        let colorized_search = format!("\x1b[91;1m{}\x1b[0m", search);
+        return self.description.replace(search, &colorized_search);
+    }
+
+    fn display_nocolor(&self, topic: &str, search: &str, match_colored: bool) {
         println!("");
 
-        if self.tags.len() > 0 {
-            println!("[{}][{}] {}", topic, self.tags.join(" "), self.description);
+        let description = if match_colored {
+            self.colorized_match(&search)
         } else {
-            println!("[{}] {}", topic, self.description);
+            self.description.clone()
+        };
+
+        if self.tags.len() > 0 {
+            println!("[{}][{}] {}", topic, self.tags.join(" "), description);
+        } else {
+            println!("[{}] {}", topic, description);
         }
 
         for d in self.data.iter() {
@@ -23,8 +34,14 @@ impl Cheatsheet {
         }
     }
 
-    fn display_colorized(&self, topic: &str) {
+    fn display_colorized(&self, topic: &str, search: &str, match_colored: bool) {
         println!("");
+
+        let description = if match_colored {
+            self.colorized_match(&search)
+        } else {
+            self.description.clone()
+        };
 
         if self.tags.len() > 0 {
             println!(
@@ -36,17 +53,17 @@ impl Cheatsheet {
             println!("\x1b[93;1m[{}]\x1b[0m", topic);
         }
 
-        println!("\x1b[92;1m#\x1b[0m {}", self.description);
+        println!("\x1b[92;1m#\x1b[0m {}", description);
 
         for d in self.data.iter() {
             println!("\x1b[92;1m>>>\x1b[0m \x1b[95m{}\x1b[0m", d);
         }
     }
 
-    pub fn display(&self, topic: &str) {
+    pub fn display(&self, topic: &str, search: &str, match_colored: bool) {
         match env::var("KSEARCH_COLORED") {
-            Ok(_) => self.display_colorized(&topic),
-            _ => self.display_nocolor(&topic),
+            Ok(_) => self.display_colorized(&topic, &search, match_colored),
+            _ => self.display_nocolor(&topic, &search, match_colored),
         }
     }
 }
@@ -100,11 +117,17 @@ fn is_json_file(path: &PathBuf) -> bool {
     }
 }
 
-pub fn show_topic(cheatsheets: &Vec<Cheatsheet>, topic: &str, search: &str, filter: &str) {
+pub fn show_topic(
+    cheatsheets: &Vec<Cheatsheet>,
+    topic: &str,
+    search: &str,
+    filter: &str,
+    match_colored: bool,
+) {
     match parse_topic(&cheatsheets, &search, &filter) {
         Ok(cheatsheets) => {
             for ch in cheatsheets.iter() {
-                ch.display(&topic);
+                ch.display(&topic, &search, match_colored);
             }
             println!("");
         }
@@ -117,6 +140,7 @@ pub fn find_files(
     search: &str,
     filter: &str,
     inventory_flag: bool,
+    match_colored: bool,
 ) -> io::Result<()> {
     for entry in fs::read_dir(path)? {
         let entry = entry?;
@@ -130,7 +154,7 @@ pub fn find_files(
                     println!("{}", topic);
                 } else {
                     let cheatsheets = from_file(&p);
-                    show_topic(&cheatsheets, &topic, &search, &filter);
+                    show_topic(&cheatsheets, &topic, &search, &filter, match_colored);
                 }
             } // XXX: Add Else and log
         }
