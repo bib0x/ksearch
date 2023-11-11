@@ -44,6 +44,10 @@ $ ksearch -i
 $ ksearch --generate
 ```
 
+![Search without colored output](./examples/search_without_color.png "Search without color")
+
+![Search with colored output](./examples/search_colored_output.png "Search with color")
+
 ## Create a resources directory
 
 ```
