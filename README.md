@@ -112,8 +112,48 @@ pfsense.json
 
 ## BONUS
 
+### FZF integration
+
 It's possible to use fzf to have so kind of searchable frontend to edit or view CUE files
 
 ```
 $ KSEARCH_PATH=`pwd`/resources/tests ./target/debug/ksearch -l | fzf -e --preview 'bat -l go --style changes,header --color=always --line-range :500 {}' --bind 'ctrl-e:become($EDITOR {+})'  --bind 'enter:become(bat -l go --style changes,header --color=always {})'
+```
+
+### Nix derivation
+
+
+```
+{ lib, fetchFromGitHub, rustPlatform, pkg-config, git, openssl, installShellFiles }:
+
+rustPlatform.buildRustPackage rec {
+  pname = "ksearch";
+  version = "1.0.3";
+
+  src = fetchFromGitHub {
+    owner = "bib0x";
+    repo = pname;
+    rev = "v${version}";
+    sha256 = "sha256-MBtq9HNqlcWfeYtz7EJ2dmloy/YXoRvwahHKQvyroWQ=";
+  };
+
+  cargoLock = {
+    lockFile = ./Cargo.lock;
+  };
+
+  nativeBuildInputs = [ git pkg-config installShellFiles ];
+  buildInputs = [ openssl ];
+
+  postInstall = ''
+    git apply patches/bash_completions.bash
+    installShellCompletion --bash --name ksearch completions/ksearch.bash
+  '';
+
+  meta = with lib; {
+    description = "JSON based knowledge search";
+    homepage = "https://github.com/bib0x/ksearch";
+    license = licenses.unlicense;
+    maintainers = with maintainers; [ "bib0x" ];
+  };
+}
 ```
