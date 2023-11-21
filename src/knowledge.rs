@@ -30,7 +30,12 @@ impl Knowledge {
         }
 
         for d in self.data.iter() {
-            println!("- {}", d);
+            // Check if the data is a comment to display it with dedicated color
+            if d.starts_with("//") {
+                println!("{}", d);
+            } else {
+                println!("- {}", d);
+            }
         }
     }
 
@@ -56,7 +61,12 @@ impl Knowledge {
         println!("\x1b[92;1m#\x1b[0m {}", description);
 
         for d in self.data.iter() {
-            println!("\x1b[92;1m>>>\x1b[0m \x1b[95m{}\x1b[0m", d);
+            // Check if the data is a comment to display it with dedicated color
+            if d.starts_with("//") {
+                println!("\x1b[90;1m{}\x1b[0m", d);
+            } else {
+                println!("\x1b[92;1m>>>\x1b[0m \x1b[95m{}\x1b[0m", d);
+            }
         }
     }
 
