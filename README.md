@@ -134,12 +134,10 @@ rustPlatform.buildRustPackage rec {
     owner = "bib0x";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-MBtq9HNqlcWfeYtz7EJ2dmloy/YXoRvwahHKQvyroWQ=";
+    sha256 = "sha256-UD1GhyEstOQBo8S1V6vvWAwh+IpbmcSxLzf6CAj92kw=";
   };
 
-  cargoLock = {
-    lockFile = ./Cargo.lock;
-  };
+  cargoHash = "sha256-2NtO83RvMDVw4nwaYQyDaqJxB/2OrLt56yXZIUDsC5M=";
 
   nativeBuildInputs = [ git pkg-config installShellFiles ];
   buildInputs = [ openssl ];
