@@ -10,11 +10,11 @@ fn is_cue_file(path: &PathBuf) -> bool {
 }
 
 pub fn export_as_json(cuepath: &PathBuf, jsonpath: &PathBuf) -> io::Result<()> {
-    let entries = fs::read_dir(".")?
+    let entries = fs::read_dir(&cuepath)?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()?;
 
-    let _ = entries.par_iter().map(|path| {
+    entries.par_iter().for_each(|path| {
         if is_cue_file(&path) {
             let mut tmp_path = path.clone();
             tmp_path.set_extension("");
