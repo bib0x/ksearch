@@ -1,0 +1,14 @@
+[[knowledges]]
+description = "rotate auditd logs"
+data = [
+  "/etc/init.d/auditd rotate",
+  "kill -USR1 $(pidof auditd)"
+]
+tags = []
+
+[[knowledges]]
+description = "florian roth overview and resources"
+data = [
+  "https://github.com/Neo23x0/auditd"
+]
+tags = ["link"]

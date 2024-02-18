@@ -41,13 +41,6 @@ pub fn build_cli(program_name: &'static str) -> Command {
                 .help("Show topic path if exist"),
         )
         .arg(
-            Arg::new("generate")
-                .long("generate")
-                .short('G')
-                .action(ArgAction::SetTrue)
-                .help("Generate CUE datastructures as JSON file"),
-        )
-        .arg(
             Arg::new("inventory")
                 .long("inventory")
                 .short('i')
