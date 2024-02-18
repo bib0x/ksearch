@@ -3,10 +3,9 @@
 Ksearch stands for `knowledge search`. I am using different kind of place to store knowledge (zettelkasten, Firefox bookmarks, Gist...). The issue is that I tend to forget where I've stored all of this... 
 
 To solve this memory issue, I use this tool to index where I store my stuff.  
-However, it's a manual indexing process (where you have to write your CUE file) which is kind of slow.  
+However, it's a manual indexing process (where you have to write your TOML file) which is kind of slow.  
 
-Knowledges are defined using CUE language to generate JSON 
-files that could be parsed next by this tool.
+Knowledges are defined using TOML files parsed by this tool.
 
 ## Usage
 
@@ -21,7 +20,6 @@ Options:
   -f, --filter <filter>  Search filters such as tags [default: ]
   -e, --environment      Show environment variable
   -p, --path             Show topic path if exist
-  -G, --generate         Generate CUE notes as JSON file
   -i, --inventory        List all available topics
   -m, --match-color      Enable colored match
   -l, --list             List all CUE files with fullpath
@@ -57,51 +55,24 @@ $ pwd
 /home/user/dev/git/ksearch_resources/
 
 # Create directories
-$ mkdir -p resources/{cue,json}
-$ cd resources/cue
+$ mkdir -p resources/
+$ cd resources/
 
-# Create cue module with `Knowledges` datastructure
-$ cue mod init bib0x.github.com
-$ mkdir schema
-$ cat > schema/knowledges.cue <<EOF
-package schema
-
-#Knowledge: {
-    description: string
-    data: [...string]
-    tags: [...string]
-}
-EOF
-
-# Create a knowledge
-$ cat > pfsense.cue <<EOF
-package main
-
-import (
-  "bib0x.github.com/schema"
-)
-
-[
-  schema.#Knowledge & {
-    description: "show routes",
-    data: [
-      "netstat -rWn",
-    ]
-    tags: [
-      "netstat",
-    ]
-  },
-  schema.#Knowledge & {
-    description: "show rules",
-    data: [
-      "pfctl -sr",
-    ],
-    tags: [
-      "pfctl",
-      "firewall"
-    ]
-  },
+$ cat > auditd.toml <<EOF
+[[knowledges]]
+description = "rotate auditd logs"
+data = [
+  "/etc/init.d/auditd rotate",
+  "kill -USR1 $(pidof auditd)"
 ]
+tags = []
+
+[[knowledges]]
+description = "florian roth overview and resources"
+data = [
+  "https://github.com/Neo23x0/auditd"
+]
+tags = ["link"]
 EOF
 
 # Tests: Generate JSON file from CUE
