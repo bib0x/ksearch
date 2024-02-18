@@ -1,13 +1,25 @@
-use std::{env, path::Path, path::PathBuf, process::exit};
+use std::{io, env, path::Path, path::PathBuf, process::exit};
+use std::fs;
 
 mod cli;
-mod cue;
 mod knowledge;
 
 pub fn topic_exists(path: &PathBuf, topic: &str) -> bool {
     let mut p = Path::new(path).join(topic);
-    p.set_extension("json");
+    p.set_extension("toml");
     p.exists()
+}
+
+
+pub fn list_fullpath(path: &PathBuf) -> io::Result<()> {
+    for entry in fs::read_dir(path)? {
+        let entry = entry?;
+        let p = entry.path();
+        if knowledge::is_toml_file(&p) {
+            println!("{}", p.display());
+        }
+    }
+    Ok(())
 }
 
 pub fn show_paths(path: &PathBuf, topic: &str) {
@@ -34,10 +46,9 @@ fn main() {
 
     let env_flag = matches.get_flag("env");
     let path_flag = matches.get_flag("path");
-    let generate_flag = matches.get_flag("generate");
     let inventory_flag = matches.get_flag("inventory");
     let match_color_flag = matches.get_flag("match_color");
-    let list_cue_flag = matches.get_flag("list");
+    let list_flag = matches.get_flag("list");
 
     let has_topic = topic.len() > 0;
 
@@ -51,30 +62,22 @@ fn main() {
         }
     } else {
         for path in csheet_paths.split(":") {
-            if generate_flag {
-                let cuepath = Path::new(path).join("cue");
-                let jsonpath = Path::new(path).join("json");
-                if let Err(_) = cue::export_as_json(&cuepath, &jsonpath) {
-                    eprintln!("Cue export to json failed for {}", cuepath.display());
-                    exit(1);
-                }
-            } else if list_cue_flag {
-                let cuepath = Path::new(path).join("cue");
-                let _ = cue::list_fullpath(&cuepath);
+            let mut tomlpath = PathBuf::from(path);
+            if list_flag {
+                let _ = list_fullpath(&tomlpath);
             } else {
-                let mut jsonpath = Path::new(path).join("json");
                 if has_topic {
-                    if !topic_exists(&jsonpath, &topic) {
+                    if !topic_exists(&tomlpath, &topic) {
                         println!("Unknown topic named '{}'", topic);
                     } else {
                         if path_flag {
-                            show_paths(&jsonpath, &topic);
+                            show_paths(&tomlpath, &topic);
                         } else {
-                            jsonpath.push(topic.clone());
-                            jsonpath.set_extension("json");
-                            let knowledges = knowledge::from_file(&jsonpath);
+                            tomlpath.push(topic.clone());
+                            tomlpath.set_extension("toml");
+                            let topic_content = knowledge::from_file(&tomlpath);
                             knowledges_found = knowledge::show_topic(
-                                &knowledges,
+                                &topic_content.knowledges,
                                 &topic,
                                 &search,
                                 &filter,
@@ -85,9 +88,9 @@ fn main() {
                 } else {
                     if inventory_flag {
                         println!("");
-                        println!("{}", jsonpath.display());
+                        println!("{}", tomlpath.display());
                         let _ = knowledge::find_files(
-                            &jsonpath,
+                            &tomlpath,
                             "",
                             "",
                             inventory_flag,
@@ -96,7 +99,7 @@ fn main() {
                         println!("");
                     } else {
                         let res = knowledge::find_files(
-                            &jsonpath,
+                            &tomlpath,
                             &search,
                             &filter,
                             inventory_flag,
