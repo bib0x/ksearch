@@ -14,7 +14,7 @@ index b0929cc..a7ed8c6 100644
 -                    COMPREPLY=($(compgen -f "${cur}"))
 +                -t|--topic)
 +		    files=$(IFS=:; for path in $KSEARCH_PATH; do find -L $path -type f -name "$cur*.toml" -printf '%f\n'; done | sort -u | sed -E 's/\.toml$//g')
-+                    COMPREPLY=($(compgen -f "${files}" -- ${cur}))
++                    COMPREPLY=($(compgen -W "${files}" -- ${cur}))
                      return 0
                      ;;
                  --filter)
