@@ -24,7 +24,7 @@ pub fn list_fullpath(path: &PathBuf) -> io::Result<()> {
 
 pub fn show_paths(path: &PathBuf, topic: &str) {
     if topic_exists(&path, &topic) {
-        println!("{}", path.display());
+        println!("{}/{}.toml", path.display(), topic);
     }
 }
 
