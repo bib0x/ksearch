@@ -1,34 +1,9 @@
-use std::{io, env, path::Path, path::PathBuf, process::exit};
-use std::fs;
+use std::{io, env, path::PathBuf, process::exit};
 
 mod cli;
 mod knowledge;
 
-pub fn topic_exists(path: &PathBuf, topic: &str) -> bool {
-    let mut p = Path::new(path).join(topic);
-    p.set_extension("toml");
-    p.exists()
-}
-
-
-pub fn list_fullpath(path: &PathBuf) -> io::Result<()> {
-    for entry in fs::read_dir(path)? {
-        let entry = entry?;
-        let p = entry.path();
-        if knowledge::is_toml_file(&p) {
-            println!("{}", p.display());
-        }
-    }
-    Ok(())
-}
-
-pub fn show_paths(path: &PathBuf, topic: &str) {
-    if topic_exists(&path, &topic) {
-        println!("{}/{}.toml", path.display(), topic);
-    }
-}
-
-fn main() {
+fn main() -> io::Result<()> {
     let csheet_paths = match env::var("KSEARCH_PATH") {
         Ok(envpath) => envpath,
         Err(_) => {
@@ -50,71 +25,91 @@ fn main() {
     let match_color_flag = matches.get_flag("match_color");
     let list_flag = matches.get_flag("list");
 
-    let has_topic = topic.len() > 0;
-
     let mut knowledges_found = false;
 
+    // Standalone option
+    // -e
+    // List KSEARCH environment variables
     if env_flag {
-        println!("KSEARCH_PATH={}", csheet_paths.as_str());
+        println!("KSEARCH_PATH\t{}", csheet_paths.as_str());
         match env::var("KSEARCH_COLORED") {
-            Ok(_) => println!("KSEARCH_COLORED OK"),
-            _ => println!("KSEARCH_COLORED KO"),
+            Ok(_) => println!("KSEARCH_COLORED\tenabled"),
+            _ => println!("KSEARCH_COLORED\tdisabled"),
         }
-    } else {
-        for path in csheet_paths.split(":") {
-            let mut tomlpath = PathBuf::from(path);
-            if list_flag {
-                let _ = list_fullpath(&tomlpath);
-            } else {
-                if has_topic {
-                    if !topic_exists(&tomlpath, &topic) {
-                        println!("Unknown topic named '{}'", topic);
-                    } else {
-                        if path_flag {
-                            show_paths(&tomlpath, &topic);
-                        } else {
-                            tomlpath.push(topic.clone());
-                            tomlpath.set_extension("toml");
-                            let topic_content = knowledge::from_file(&tomlpath);
-                            knowledges_found = knowledge::show_topic(
-                                &topic_content.knowledges,
-                                &topic,
-                                &search,
-                                &filter,
-                                match_color_flag,
-                            );
-                        }
-                    }
-                } else {
-                    if inventory_flag {
-                        println!("");
-                        println!("{}", tomlpath.display());
-                        let _ = knowledge::find_files(
-                            &tomlpath,
-                            "",
-                            "",
-                            inventory_flag,
-                            match_color_flag,
-                        );
-                        println!("");
-                    } else {
-                        let res = knowledge::find_files(
-                            &tomlpath,
-                            &search,
-                            &filter,
-                            inventory_flag,
-                            match_color_flag,
-                        );
+        return Ok(());
+    }
 
-                        if res.is_ok() {
-                            knowledges_found = true;
-                        }
-                    }
-                }
+    // Options needing to loop over KSEARCH_PATH
+    let directories : Vec<_> = csheet_paths.split(":").collect();
+
+    // -l
+    // List fullpath of Toml files used to store knowledges
+    if list_flag {
+        for directory in directories {
+            knowledge::list_fullpath(&directory)?
+        }
+        return Ok(());
+    }
+
+    // -i
+    // List all topics name according to there location
+    if inventory_flag {
+        for directory in directories {
+            println!("");
+            println!("{}", directory);
+            let _ = knowledge::find_files(
+                &directory,
+                "",
+                "",
+                inventory_flag,
+                match_color_flag,
+            );
+            println!("");
+        }
+        return Ok(());
+    }
+
+    // -p & -t
+    // List fullpath of a Toml file if it exists
+    if path_flag && topic.len() > 0 {
+        for directory in directories {
+            if knowledge::topic_exists(&directory, &topic) {
+                println!("{}/{}.toml", directory, topic);
+            } else {
+                println!("Unknown topic named '{}'", topic);
+            }
+        }
+        return Ok(())
+    }
+
+    // -t
+    // Search in a dedicated Toml file
+    if topic.len() > 0 {
+        for directory in directories {
+            if knowledge::topic_exists(&directory, &topic) {
+                let mut tomlpath = PathBuf::from(directory);
+                tomlpath.push(topic.clone());
+                tomlpath.set_extension("toml");
+
+                let content = knowledge::from_file(&tomlpath);
+                knowledges_found = knowledge::show_topic(&content.knowledges, &topic, &search, &filter, match_color_flag);
             }
         }
         if knowledges_found {
             println!("");
         }
+        return Ok(());
     }
+
+    // If no topic have been targeted, search in all files
+    for directory in directories {
+        let res = knowledge::find_files(&directory, &search, &filter, inventory_flag, match_color_flag);
+        knowledges_found = res.is_ok_and(|r| r == true);
+    }
+
+    if knowledges_found {
+        println!("");
+    }
+
+    Ok(())
 }

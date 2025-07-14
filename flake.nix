@@ -25,6 +25,9 @@
             rustfmt 
             rust-bin.stable.latest.default
           ];
+	  shellHook = ''
+           export KSEARCH_PATH=""
+	  '';
         };
       }
     );

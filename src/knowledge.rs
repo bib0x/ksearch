@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use std::{env, fs, io, path::PathBuf};
+use std::{env, fs, io, path::PathBuf, path::Path};
 
 use toml;
 
@@ -85,6 +85,24 @@ impl Knowledge {
     }
 }
 
+
+pub fn list_fullpath(path: &str) -> io::Result<()> {
+    for entry in fs::read_dir(path)? {
+        let entry = entry?;
+        let p = entry.path();
+        if is_toml_file(&p) {
+            println!("{}", p.display());
+        }
+    }
+    Ok(())
+}
+
+pub fn topic_exists(path: &str, topic: &str) -> bool {
+    let mut p = Path::new(path).join(topic);
+    p.set_extension("toml");
+    p.exists()
+}
+
 pub fn from_file(path: &PathBuf) -> TopicContent {
     let content = fs::read_to_string(path).expect("could not read the toml file");
     let topic_content: TopicContent = toml::from_str(&content).unwrap();
@@ -129,7 +147,7 @@ fn parse_topic(
 pub fn is_toml_file(path: &PathBuf) -> bool {
     match path.extension() {
         Some(extension) => extension == "toml",
-        None => false,
+        _ => false,
     }
 }
 
@@ -154,7 +172,7 @@ pub fn show_topic(
 }
 
 pub fn find_files(
-    path: &PathBuf,
+    path: &str,
     search: &str,
     filter: &str,
     inventory_flag: bool,
